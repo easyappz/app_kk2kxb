@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Max, Count, Case, When, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
@@ -19,7 +19,8 @@ from api.serializers import (
     PostSerializer,
     CommentSerializer,
     FriendRequestSerializer,
-    SubscriptionSerializer
+    SubscriptionSerializer,
+    MessageSerializer
 )
 from api.authentication import MemberJWTAuthentication
 
@@ -830,3 +831,161 @@ class SubscriptionViewSet(viewsets.ViewSet):
         followers = [sub.follower for sub in subscriptions]
         serializer = MemberSerializer(followers, many=True)
         return Response(serializer.data)
+
+
+class MessageViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Message operations
+    """
+    authentication_classes = [MemberJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: dict},
+        description="Get list of conversations (dialogs grouped by conversation partners)"
+    )
+    def list(self, request):
+        user = request.user
+        
+        # Get all messages where user is sender or receiver
+        messages = Message.objects.filter(
+            Q(sender=user) | Q(receiver=user)
+        ).select_related('sender', 'receiver')
+        
+        # Group by conversation partner
+        conversations = {}
+        for message in messages:
+            partner = message.receiver if message.sender.id == user.id else message.sender
+            
+            if partner.id not in conversations:
+                conversations[partner.id] = {
+                    'member': partner,
+                    'last_message': message,
+                    'unread_count': 0
+                }
+            
+            # Update last message if this one is newer
+            if message.created_at > conversations[partner.id]['last_message'].created_at:
+                conversations[partner.id]['last_message'] = message
+        
+        # Count unread messages
+        for partner_id in conversations:
+            unread_count = Message.objects.filter(
+                sender_id=partner_id,
+                receiver=user,
+                is_read=False
+            ).count()
+            conversations[partner_id]['unread_count'] = unread_count
+        
+        # Convert to list and serialize
+        results = []
+        for partner_id, conv_data in conversations.items():
+            results.append({
+                'member': MemberSerializer(conv_data['member']).data,
+                'last_message': MessageSerializer(conv_data['last_message']).data,
+                'unread_count': conv_data['unread_count']
+            })
+        
+        # Sort by last message time
+        results.sort(key=lambda x: x['last_message']['created_at'], reverse=True)
+        
+        return Response({
+            'count': len(results),
+            'results': results
+        })
+
+    @extend_schema(
+        responses={200: dict},
+        description="Get message history with specific user"
+    )
+    def retrieve(self, request, pk=None):
+        user = request.user
+        
+        try:
+            other_member = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get all messages between these two users
+        messages = Message.objects.filter(
+            Q(sender=user, receiver=other_member) |
+            Q(sender=other_member, receiver=user)
+        ).select_related('sender', 'receiver').order_by('created_at')
+        
+        serializer = MessageSerializer(messages, many=True)
+        
+        return Response({
+            'count': messages.count(),
+            'results': serializer.data
+        })
+
+    @extend_schema(
+        responses={201: MessageSerializer},
+        description="Send message to user"
+    )
+    def create(self, request, pk=None):
+        user = request.user
+        
+        try:
+            receiver = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        content = request.data.get('content')
+        if not content:
+            return Response(
+                {"detail": "Content is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        message = Message.objects.create(
+            sender=user,
+            receiver=receiver,
+            content=content
+        )
+        
+        serializer = MessageSerializer(message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses={200: MessageSerializer},
+        description="Mark message as read"
+    )
+    @action(detail=True, methods=['patch'], url_path='read')
+    def mark_read(self, request, pk=None):
+        user = request.user
+        
+        try:
+            message = Message.objects.get(id=pk, receiver=user)
+        except Message.DoesNotExist:
+            return Response(
+                {"detail": "Message not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        message.is_read = True
+        message.save()
+        
+        serializer = MessageSerializer(message)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: dict},
+        description="Get unread messages count"
+    )
+    @action(detail=False, methods=['get'], url_path='unread-count')
+    def unread_count(self, request):
+        user = request.user
+        
+        count = Message.objects.filter(
+            receiver=user,
+            is_read=False
+        ).count()
+        
+        return Response({'unread_count': count})

@@ -9,7 +9,8 @@ from api.views import (
     CommentViewSet,
     FriendRequestViewSet,
     FriendViewSet,
-    SubscriptionViewSet
+    SubscriptionViewSet,
+    MessageViewSet
 )
 
 router = DefaultRouter()
@@ -36,6 +37,12 @@ urlpatterns = [
     path('subscriptions/<int:pk>/', SubscriptionViewSet.as_view({'post': 'create', 'delete': 'destroy'}), name='subscription'),
     path('subscriptions/following/', SubscriptionViewSet.as_view({'get': 'following'}), name='subscription-following'),
     path('subscriptions/followers/', SubscriptionViewSet.as_view({'get': 'followers'}), name='subscription-followers'),
+    
+    # Messages
+    path('messages/', MessageViewSet.as_view({'get': 'list'}), name='message-list'),
+    path('messages/<int:pk>/', MessageViewSet.as_view({'get': 'retrieve', 'post': 'create'}), name='message-conversation'),
+    path('messages/<int:pk>/read/', MessageViewSet.as_view({'patch': 'mark_read'}), name='message-mark-read'),
+    path('messages/unread-count/', MessageViewSet.as_view({'get': 'unread_count'}), name='message-unread-count'),
     
     path('', include(router.urls)),
 ]
