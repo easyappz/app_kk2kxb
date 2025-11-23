@@ -4,11 +4,15 @@ from api.views import (
     RegisterView,
     LoginView,
     LogoutView,
-    MemberViewSet
+    MemberViewSet,
+    PostViewSet,
+    CommentViewSet
 )
 
 router = DefaultRouter()
 router.register(r'members', MemberViewSet, basename='member')
+router.register(r'posts', PostViewSet, basename='post')
+router.register(r'comments', CommentViewSet, basename='comment')
 
 urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='register'),
