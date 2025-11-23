@@ -7,7 +7,7 @@ import { Home } from './components/Home';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Profile from './components/Profile/Profile';
-import Friends from './components/Friends/Friends';
+import Friends from './components/Friends';
 import Messages from './components/Messages/Messages';
 import Search from './components/Search/Search';
 import Settings from './components/Settings/Settings';
