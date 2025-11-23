@@ -8,7 +8,7 @@
 
 .messages-container {
   display: grid;
-  grid-template-columns: 350px 1fr;
+  grid-template-columns: 380px 1fr;
   height: 100%;
 }
 
@@ -16,37 +16,24 @@
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
+  background: white;
 }
 
 .messages-header {
-  padding: 20px;
+  padding: 24px 20px;
   border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
 }
 
 .messages-header h2 {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #111827;
   margin: 0;
-}
-
-.new-message-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.new-message-button:hover {
-  transform: scale(1.1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .conversations-list {
@@ -62,18 +49,24 @@
 
 .messages-main {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   background: #f9fafb;
 }
 
 .no-conversation-selected {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 40px;
 }
 
 .no-conversation-selected .empty-icon {
   font-size: 80px;
   margin-bottom: 20px;
+  opacity: 0.5;
 }
 
 .no-conversation-selected h2 {
@@ -89,12 +82,30 @@
   margin: 0;
 }
 
+@media (max-width: 968px) {
+  .messages-container {
+    grid-template-columns: 320px 1fr;
+  }
+}
+
 @media (max-width: 768px) {
+  .messages-page {
+    height: calc(100vh - 120px);
+  }
+
   .messages-container {
     grid-template-columns: 1fr;
   }
 
   .messages-main {
     display: none;
+  }
+
+  .messages-sidebar.has-selection {
+    display: none;
+  }
+
+  .messages-main.has-selection {
+    display: flex;
   }
 }
