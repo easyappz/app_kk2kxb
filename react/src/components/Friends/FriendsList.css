@@ -2,27 +2,117 @@
   width: 100%;
 }
 
-.friends-grid {
+.friends-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.friends-list-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.friends-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.friends-list-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
 }
 
-.loading-state,
-.error-state {
-  text-align: center;
+.friend-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.friends-list-loading,
+.friends-list-error,
+.friends-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 60px 20px;
-  font-size: 16px;
-  color: #6b7280;
+  text-align: center;
 }
 
-.error-state {
-  color: #ef4444;
+.friends-list-loading .spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
-  .friends-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.friends-list-loading p,
+.friends-list-error p {
+  color: #d0d0d0;
+  font-size: 16px;
+}
+
+.friends-list-error .btn-retry,
+.friends-list-empty .btn-search {
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.friends-list-error .btn-retry:hover,
+.friends-list-empty .btn-search:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.friends-list-empty .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.friends-list-empty h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #ffffff;
+}
+
+.friends-list-empty p {
+  margin: 0 0 24px 0;
+  color: #a0a0a0;
+  font-size: 16px;
 }

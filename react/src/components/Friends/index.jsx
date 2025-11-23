@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import MainLayout from '../Layout/MainLayout';
 import FriendsList from './FriendsList';
 import FriendRequests from './FriendRequests';
@@ -6,51 +6,54 @@ import Followers from './Followers';
 import Following from './Following';
 import './Friends.css';
 
-function Friends() {
+const Friends = () => {
   const [activeTab, setActiveTab] = useState('friends');
+
+  const tabs = [
+    { id: 'friends', label: 'Друзья', icon: '👥' },
+    { id: 'requests', label: 'Заявки', icon: '📬' },
+    { id: 'followers', label: 'Подписчики', icon: '👤' },
+    { id: 'following', label: 'Подписки', icon: '📡' },
+  ];
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'friends':
+        return <FriendsList />;
+      case 'requests':
+        return <FriendRequests />;
+      case 'followers':
+        return <Followers />;
+      case 'following':
+        return <Following />;
+      default:
+        return <FriendsList />;
+    }
+  };
 
   return (
     <MainLayout>
       <div className="friends-page" data-easytag="id1-react/src/components/Friends/index.jsx">
-        <div className="page-header">
-          <h1>Друзья</h1>
+        <div className="friends-container">
           <div className="friends-tabs">
-            <button 
-              className={`tab-button ${activeTab === 'friends' ? 'active' : ''}`}
-              onClick={() => setActiveTab('friends')}
-            >
-              Все друзья
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'requests' ? 'active' : ''}`}
-              onClick={() => setActiveTab('requests')}
-            >
-              Заявки
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'followers' ? 'active' : ''}`}
-              onClick={() => setActiveTab('followers')}
-            >
-              Подписчики
-            </button>
-            <button 
-              className={`tab-button ${activeTab === 'following' ? 'active' : ''}`}
-              onClick={() => setActiveTab('following')}
-            >
-              Подписки
-            </button>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="tab-icon">{tab.icon}</span>
+                <span className="tab-label">{tab.label}</span>
+              </button>
+            ))}
           </div>
-        </div>
-
-        <div className="friends-content">
-          {activeTab === 'friends' && <FriendsList />}
-          {activeTab === 'requests' && <FriendRequests />}
-          {activeTab === 'followers' && <Followers />}
-          {activeTab === 'following' && <Following />}
+          <div className="friends-content">
+            {renderTabContent()}
+          </div>
         </div>
       </div>
     </MainLayout>
   );
-}
+};
 
 export default Friends;

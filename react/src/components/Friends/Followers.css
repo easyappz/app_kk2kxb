@@ -2,27 +2,116 @@
   width: 100%;
 }
 
+.followers-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.followers-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.followers-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 12px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .followers-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
 }
 
-.loading-state,
-.error-state {
-  text-align: center;
+.follower-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.followers-loading,
+.followers-error,
+.followers-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   padding: 60px 20px;
-  font-size: 16px;
-  color: #6b7280;
+  text-align: center;
 }
 
-.error-state {
-  color: #ef4444;
+.followers-loading .spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #06b6d4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
-  .followers-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.followers-loading p,
+.followers-error p {
+  color: #d0d0d0;
+  font-size: 16px;
+}
+
+.followers-error .btn-retry {
+  margin-top: 16px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.followers-error .btn-retry:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
+.followers-empty .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.followers-empty h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #ffffff;
+}
+
+.followers-empty p {
+  margin: 0;
+  color: #a0a0a0;
+  font-size: 16px;
 }

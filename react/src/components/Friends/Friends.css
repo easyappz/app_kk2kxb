@@ -1,83 +1,129 @@
 .friends-page {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
 }
 
-.page-header {
-  margin-bottom: 32px;
-}
-
-.page-header h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 20px 0;
+.friends-container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .friends-tabs {
   display: flex;
-  gap: 8px;
-  border-bottom: 2px solid #e5e7eb;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow-x: auto;
 }
 
 .tab-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 24px;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
-  color: #6b7280;
-  font-size: 15px;
+  border-radius: 12px;
+  color: #a0a0a0;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: -2px;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+  z-index: -1;
 }
 
 .tab-button:hover {
-  color: #667eea;
+  color: #ffffff;
+}
+
+.tab-button:hover::before {
+  opacity: 0.2;
 }
 
 .tab-button.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: #ffffff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tab-button.active::before {
+  opacity: 1;
+}
+
+.tab-icon {
+  font-size: 20px;
+}
+
+.tab-label {
+  font-size: 16px;
 }
 
 .friends-content {
-  padding: 40px 0;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-}
-
-.empty-icon {
-  font-size: 80px;
-  margin-bottom: 20px;
-}
-
-.empty-state h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 12px 0;
-}
-
-.empty-state p {
-  color: #6b7280;
-  font-size: 16px;
-  margin: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 768px) {
   .friends-page {
-    padding: 20px;
+    padding: 12px;
+  }
+
+  .friends-tabs {
+    padding: 6px;
+    gap: 8px;
   }
 
   .tab-button {
     padding: 10px 16px;
     font-size: 14px;
+  }
+
+  .tab-icon {
+    font-size: 18px;
+  }
+
+  .tab-label {
+    font-size: 14px;
+  }
+
+  .friends-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-button {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  .tab-label {
+    font-size: 12px;
   }
 }
