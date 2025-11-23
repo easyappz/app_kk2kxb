@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import models
 from api.models import Member, Post, Comment, Like, FriendRequest, Subscription, Message
 
 
@@ -77,6 +78,20 @@ class MemberRegistrationSerializer(serializers.ModelSerializer):
         member.set_password(password)
         member.save()
         return member
+
+
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(max_length=128, write_only=True)
+
+
+class TokenSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    refresh = serializers.CharField()
+
+
+class OnlineStatusSerializer(serializers.Serializer):
+    is_online = serializers.BooleanField()
 
 
 class CommentSerializer(serializers.ModelSerializer):
