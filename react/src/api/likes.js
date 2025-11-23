@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with likes count
  */
 export const addLike = async (postId) => {
-  const response = await instance.post(`/api/posts/${postId}/like`, {}, {
+  const response = await instance.post(`/api/posts/${postId}/like/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -27,7 +27,7 @@ export const addLike = async (postId) => {
  * @returns {Promise} Response with likes count
  */
 export const removeLike = async (postId) => {
-  const response = await instance.post(`/api/posts/${postId}/unlike`, {}, {
+  const response = await instance.post(`/api/posts/${postId}/unlike/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -39,7 +39,7 @@ export const removeLike = async (postId) => {
  * @returns {Promise} Post data with likes information
  */
 export const getLikes = async (postId) => {
-  const response = await instance.get(`/api/posts/${postId}`, {
+  const response = await instance.get(`/api/posts/${postId}/`, {
     headers: getAuthHeaders()
   });
   return response.data;

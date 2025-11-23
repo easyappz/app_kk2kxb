@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Created friend request data
  */
 export const sendFriendRequest = async (memberId) => {
-  const response = await instance.post('/api/friends/requests', 
+  const response = await instance.post('/api/friends/requests/', 
     { to_member: memberId },
     { headers: getAuthHeaders() }
   );
@@ -31,7 +31,7 @@ export const sendFriendRequest = async (memberId) => {
  * @returns {Promise} Response with count and results
  */
 export const getFriendRequests = async (params = {}) => {
-  const response = await instance.get('/api/friends/requests', {
+  const response = await instance.get('/api/friends/requests/', {
     params,
     headers: getAuthHeaders()
   });
@@ -44,7 +44,7 @@ export const getFriendRequests = async (params = {}) => {
  * @returns {Promise} Updated friend request data
  */
 export const acceptRequest = async (requestId) => {
-  const response = await instance.post(`/api/friends/requests/${requestId}/accept`, {}, {
+  const response = await instance.post(`/api/friends/requests/${requestId}/accept/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -56,7 +56,7 @@ export const acceptRequest = async (requestId) => {
  * @returns {Promise} Updated friend request data
  */
 export const rejectRequest = async (requestId) => {
-  const response = await instance.post(`/api/friends/requests/${requestId}/decline`, {}, {
+  const response = await instance.post(`/api/friends/requests/${requestId}/decline/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -71,7 +71,7 @@ export const rejectRequest = async (requestId) => {
  * @returns {Promise} Response with count and results
  */
 export const getFriends = async (params = {}) => {
-  const response = await instance.get('/api/friends', {
+  const response = await instance.get('/api/friends/', {
     params,
     headers: getAuthHeaders()
   });
@@ -84,7 +84,7 @@ export const getFriends = async (params = {}) => {
  * @returns {Promise} Delete response
  */
 export const removeFriend = async (friendId) => {
-  const response = await instance.delete(`/api/friends/${friendId}`, {
+  const response = await instance.delete(`/api/friends/${friendId}/`, {
     headers: getAuthHeaders()
   });
   return response.data;

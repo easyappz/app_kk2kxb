@@ -18,7 +18,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with count and results
  */
 export const getPosts = async (params = {}) => {
-  const response = await instance.get('/api/posts', {
+  const response = await instance.get('/api/posts/', {
     params,
     headers: getAuthHeaders()
   });
@@ -31,7 +31,7 @@ export const getPosts = async (params = {}) => {
  * @returns {Promise} Post data
  */
 export const getPost = async (id) => {
-  const response = await instance.get(`/api/posts/${id}`, {
+  const response = await instance.get(`/api/posts/${id}/`, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -46,7 +46,7 @@ export const getPost = async (id) => {
  * @returns {Promise} Created post data
  */
 export const createPost = async (data) => {
-  const response = await instance.post('/api/posts', data, {
+  const response = await instance.post('/api/posts/', data, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -60,7 +60,7 @@ export const createPost = async (data) => {
  * @returns {Promise} Updated post data
  */
 export const updatePost = async (id, data) => {
-  const response = await instance.put(`/api/posts/${id}`, data, {
+  const response = await instance.put(`/api/posts/${id}/`, data, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -72,7 +72,7 @@ export const updatePost = async (id, data) => {
  * @returns {Promise} Delete response
  */
 export const deletePost = async (id) => {
-  const response = await instance.delete(`/api/posts/${id}`, {
+  const response = await instance.delete(`/api/posts/${id}/`, {
     headers: getAuthHeaders()
   });
   return response.data;

@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Created repost data
  */
 export const createRepost = async (postId, data = {}) => {
-  const response = await instance.post(`/api/posts/${postId}/repost`, data, {
+  const response = await instance.post(`/api/posts/${postId}/repost/`, data, {
     headers: getAuthHeaders()
   });
   return response.data;

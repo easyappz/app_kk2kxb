@@ -18,7 +18,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with count and results
  */
 export const getComments = async (postId, params = {}) => {
-  const response = await instance.get(`/api/posts/${postId}/comments`, {
+  const response = await instance.get(`/api/posts/${postId}/comments/`, {
     params,
     headers: getAuthHeaders()
   });
@@ -33,7 +33,7 @@ export const getComments = async (postId, params = {}) => {
  * @returns {Promise} Created comment data
  */
 export const addComment = async (postId, data) => {
-  const response = await instance.post(`/api/posts/${postId}/comments`, data, {
+  const response = await instance.post(`/api/posts/${postId}/comments/`, data, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -49,7 +49,7 @@ export const addComment = async (postId, data) => {
  */
 export const deleteComment = async (postId, commentId) => {
   // This endpoint might need to be adjusted based on actual API implementation
-  const response = await instance.delete(`/api/posts/${postId}/comments/${commentId}`, {
+  const response = await instance.delete(`/api/posts/${postId}/comments/${commentId}/`, {
     headers: getAuthHeaders()
   });
   return response.data;

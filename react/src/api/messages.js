@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with count and results
  */
 export const getDialogs = async (params = {}) => {
-  const response = await instance.get('/api/messages', {
+  const response = await instance.get('/api/messages/', {
     params,
     headers: getAuthHeaders()
   });
@@ -33,7 +33,7 @@ export const getDialogs = async (params = {}) => {
  * @returns {Promise} Response with count and results
  */
 export const getMessages = async (memberId, params = {}) => {
-  const response = await instance.get(`/api/messages/${memberId}`, {
+  const response = await instance.get(`/api/messages/${memberId}/`, {
     params,
     headers: getAuthHeaders()
   });
@@ -48,7 +48,7 @@ export const getMessages = async (memberId, params = {}) => {
  * @returns {Promise} Created message data
  */
 export const sendMessage = async (data) => {
-  const response = await instance.post('/api/messages', data, {
+  const response = await instance.post('/api/messages/', data, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -63,7 +63,7 @@ export const sendMessage = async (data) => {
  */
 export const markAsRead = async (memberId) => {
   // This endpoint might need to be adjusted based on actual API implementation
-  const response = await instance.post(`/api/messages/${memberId}/read`, {}, {
+  const response = await instance.post(`/api/messages/${memberId}/read/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;

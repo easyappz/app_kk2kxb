@@ -11,7 +11,7 @@ import instance from './axios';
  * @returns {Promise} Response with member, access and refresh tokens
  */
 export const register = async (data) => {
-  const response = await instance.post('/api/auth/register', data);
+  const response = await instance.post('/api/auth/register/', data);
   if (response.data.access) {
     localStorage.setItem('access_token', response.data.access);
     localStorage.setItem('refresh_token', response.data.refresh);
@@ -27,7 +27,7 @@ export const register = async (data) => {
  * @returns {Promise} Response with member, access and refresh tokens
  */
 export const login = async (credentials) => {
-  const response = await instance.post('/api/auth/login', credentials);
+  const response = await instance.post('/api/auth/login/', credentials);
   if (response.data.access) {
     localStorage.setItem('access_token', response.data.access);
     localStorage.setItem('refresh_token', response.data.refresh);
@@ -53,7 +53,7 @@ export const refreshToken = async () => {
   if (!refresh) {
     throw new Error('No refresh token available');
   }
-  const response = await instance.post('/api/auth/refresh', { refresh });
+  const response = await instance.post('/api/auth/refresh/', { refresh });
   if (response.data.access) {
     localStorage.setItem('access_token', response.data.access);
   }

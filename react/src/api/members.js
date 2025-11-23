@@ -17,7 +17,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with count and results
  */
 export const getMembers = async (params = {}) => {
-  const response = await instance.get('/api/members', {
+  const response = await instance.get('/api/members/', {
     params,
     headers: getAuthHeaders()
   });
@@ -30,7 +30,7 @@ export const getMembers = async (params = {}) => {
  * @returns {Promise} Member data
  */
 export const getMember = async (id) => {
-  const response = await instance.get(`/api/members/${id}`, {
+  const response = await instance.get(`/api/members/${id}/`, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -41,7 +41,7 @@ export const getMember = async (id) => {
  * @returns {Promise} Current member data
  */
 export const getCurrentMember = async () => {
-  const response = await instance.get('/api/members/me', {
+  const response = await instance.get('/api/members/me/', {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -59,7 +59,7 @@ export const getCurrentMember = async () => {
  * @returns {Promise} Updated member data
  */
 export const updateMember = async (id, data) => {
-  const response = await instance.put(`/api/members/${id}`, data, {
+  const response = await instance.put(`/api/members/${id}/`, data, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -74,7 +74,7 @@ export const updateMember = async (id, data) => {
  * @returns {Promise} Response with count and results
  */
 export const searchMembers = async (query, params = {}) => {
-  const response = await instance.get('/api/members/search', {
+  const response = await instance.get('/api/members/search/', {
     params: { q: query, ...params },
     headers: getAuthHeaders()
   });
@@ -87,7 +87,7 @@ export const searchMembers = async (query, params = {}) => {
  * @returns {Promise} Online status data
  */
 export const getOnlineStatus = async (id) => {
-  const response = await instance.get(`/api/members/${id}/online-status`, {
+  const response = await instance.get(`/api/members/${id}/online-status/`, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -98,7 +98,7 @@ export const getOnlineStatus = async (id) => {
  * @returns {Promise} Settings data
  */
 export const getSettings = async () => {
-  const response = await instance.get('/api/members/me/settings', {
+  const response = await instance.get('/api/members/me/settings/', {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -114,7 +114,7 @@ export const getSettings = async () => {
  * @returns {Promise} Update response
  */
 export const updateSettings = async (data) => {
-  const response = await instance.put('/api/members/me/settings', data, {
+  const response = await instance.put('/api/members/me/settings/', data, {
     headers: getAuthHeaders()
   });
   return response.data;

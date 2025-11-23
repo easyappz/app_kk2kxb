@@ -18,7 +18,7 @@ const getAuthHeaders = () => {
  * @returns {Promise} Response with count and results
  */
 export const getSubscriptions = async (params = {}) => {
-  const response = await instance.get('/api/friends/subscriptions', {
+  const response = await instance.get('/api/friends/subscriptions/', {
     params,
     headers: getAuthHeaders()
   });
@@ -31,7 +31,7 @@ export const getSubscriptions = async (params = {}) => {
  * @returns {Promise} Created subscription data
  */
 export const subscribeToMember = async (memberId) => {
-  const response = await instance.post(`/api/friends/subscriptions/${memberId}`, {}, {
+  const response = await instance.post(`/api/friends/subscriptions/${memberId}/`, {}, {
     headers: getAuthHeaders()
   });
   return response.data;
@@ -43,7 +43,7 @@ export const subscribeToMember = async (memberId) => {
  * @returns {Promise} Delete response
  */
 export const unsubscribeFromMember = async (memberId) => {
-  const response = await instance.delete(`/api/friends/subscriptions/${memberId}`, {
+  const response = await instance.delete(`/api/friends/subscriptions/${memberId}/`, {
     headers: getAuthHeaders()
   });
   return response.data;
