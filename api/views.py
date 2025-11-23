@@ -40,8 +40,18 @@ class RegisterView(APIView):
         serializer = MemberRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             member = serializer.save()
+            
+            # Generate JWT tokens
+            refresh = RefreshToken()
+            refresh['user_id'] = member.id
+            
             member_data = MemberSerializer(member).data
-            return Response(member_data, status=status.HTTP_201_CREATED)
+            
+            return Response({
+                'member': member_data,
+                'access': str(refresh.access_token),
+                'refresh': str(refresh)
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -86,8 +96,11 @@ class LoginView(APIView):
         # Generate JWT tokens
         refresh = RefreshToken()
         refresh['user_id'] = member.id
+        
+        member_data = MemberSerializer(member).data
 
         return Response({
+            'member': member_data,
             'access': str(refresh.access_token),
             'refresh': str(refresh)
         })
@@ -210,28 +223,59 @@ class MemberViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @extend_schema(
-        request=OnlineStatusSerializer,
-        responses={200: MemberSerializer},
-        description="Update member online status"
+        responses={200: dict},
+        description="Get member online status"
     )
-    @action(detail=True, methods=['patch'], url_path='online-status')
+    @action(detail=True, methods=['get'], url_path='online-status')
     def online_status(self, request, pk=None):
         member = self.get_object()
-        if member.id != request.user.id:
-            return Response(
-                {"detail": "You can only update your own online status"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        return Response({
+            'is_online': member.is_online,
+            'last_seen': member.last_seen
+        })
 
-        serializer = OnlineStatusSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    @extend_schema(
+        responses={200: MemberSerializer},
+        description="Get current user profile"
+    )
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
-        member.is_online = serializer.validated_data['is_online']
-        member.last_seen = timezone.now()
+    @extend_schema(
+        responses={200: dict},
+        description="Get user settings"
+    )
+    @action(detail=False, methods=['get'], url_path='me/settings')
+    def settings(self, request):
+        member = request.user
+        return Response({
+            'email': member.email,
+            'notifications_enabled': True,
+            'privacy_level': 'public'
+        })
+
+    @extend_schema(
+        request=dict,
+        responses={200: dict},
+        description="Update user settings"
+    )
+    @action(detail=False, methods=['put'], url_path='me/settings')
+    def update_settings(self, request):
+        member = request.user
+        
+        if 'email' in request.data:
+            member.email = request.data['email']
+        
+        if 'password' in request.data:
+            member.set_password(request.data['password'])
+        
         member.save()
-
-        return Response(MemberSerializer(member).data)
+        
+        return Response({
+            'message': 'Settings updated successfully'
+        })
 
     @extend_schema(
         responses={200: MemberSerializer(many=True)},
@@ -437,8 +481,8 @@ class PostViewSet(viewsets.ModelViewSet):
         responses={200: dict},
         description="Remove like from post"
     )
-    @action(detail=True, methods=['delete'])
-    def like(self, request, pk=None):
+    @action(detail=True, methods=['post'])
+    def unlike(self, request, pk=None):
         post = self.get_object()
         user = request.user
         
@@ -469,43 +513,37 @@ class PostViewSet(viewsets.ModelViewSet):
         responses={200: CommentSerializer(many=True)},
         description="Get comments for post"
     )
-    @action(detail=True, methods=['get'])
-    def comments(self, request, pk=None):
-        post = self.get_object()
-        comments = Comment.objects.filter(post=post).select_related('author').order_by('-created_at')
-        
-        page = self.paginate_queryset(comments)
-        if page is not None:
-            serializer = CommentSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
-
-    @extend_schema(
-        request=CommentSerializer,
-        responses={201: CommentSerializer},
-        description="Add comment to post"
-    )
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['get', 'post'])
     def comments(self, request, pk=None):
         post = self.get_object()
         
-        content = request.data.get('content')
-        if not content:
-            return Response(
-                {"detail": "Content is required"},
-                status=status.HTTP_400_BAD_REQUEST
+        if request.method == 'GET':
+            comments = Comment.objects.filter(post=post).select_related('author').order_by('-created_at')
+            
+            page = self.paginate_queryset(comments)
+            if page is not None:
+                serializer = CommentSerializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
+        
+        elif request.method == 'POST':
+            content = request.data.get('content')
+            if not content:
+                return Response(
+                    {"detail": "Content is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            comment = Comment.objects.create(
+                author=request.user,
+                post=post,
+                content=content
             )
-        
-        comment = Comment.objects.create(
-            author=request.user,
-            post=post,
-            content=content
-        )
-        
-        serializer = CommentSerializer(comment)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            serializer = CommentSerializer(comment)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         responses={201: PostSerializer},
