@@ -9,7 +9,7 @@ from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
-from api.models import Member, Post, Comment, Like, Repost, FriendRequest, Subscription
+from api.models import Member, Post, Comment, Like, Repost, FriendRequest, Subscription, Message
 from api.serializers import (
     MemberSerializer,
     MemberRegistrationSerializer,
@@ -17,7 +17,9 @@ from api.serializers import (
     TokenSerializer,
     OnlineStatusSerializer,
     PostSerializer,
-    CommentSerializer
+    CommentSerializer,
+    FriendRequestSerializer,
+    SubscriptionSerializer
 )
 from api.authentication import MemberJWTAuthentication
 
@@ -229,6 +231,72 @@ class MemberViewSet(viewsets.ModelViewSet):
         member.save()
 
         return Response(MemberSerializer(member).data)
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get member's friends list"
+    )
+    @action(detail=True, methods=['get'])
+    def friends(self, request, pk=None):
+        member = self.get_object()
+        
+        friend_requests = FriendRequest.objects.filter(
+            Q(from_member=member) | Q(to_member=member),
+            status='accepted'
+        )
+        
+        friend_ids = set()
+        for fr in friend_requests:
+            if fr.from_member.id == member.id:
+                friend_ids.add(fr.to_member.id)
+            else:
+                friend_ids.add(fr.from_member.id)
+        
+        friends = Member.objects.filter(id__in=friend_ids)
+        
+        page = self.paginate_queryset(friends)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(friends, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get member's followers"
+    )
+    @action(detail=True, methods=['get'])
+    def followers(self, request, pk=None):
+        member = self.get_object()
+        subscriptions = Subscription.objects.filter(following=member).select_related('follower')
+        followers = [sub.follower for sub in subscriptions]
+        
+        page = self.paginate_queryset(followers)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(followers, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get member's following"
+    )
+    @action(detail=True, methods=['get'])
+    def following(self, request, pk=None):
+        member = self.get_object()
+        subscriptions = Subscription.objects.filter(follower=member).select_related('following')
+        following = [sub.following for sub in subscriptions]
+        
+        page = self.paginate_queryset(following)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(following, many=True)
+        return Response(serializer.data)
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -492,3 +560,273 @@ class CommentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().destroy(request, *args, **kwargs)
+
+
+class FriendRequestViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Friend Request operations
+    """
+    authentication_classes = [MemberJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={201: FriendRequestSerializer},
+        description="Send friend request"
+    )
+    def create(self, request):
+        to_member_id = request.data.get('to_member')
+        
+        if not to_member_id:
+            return Response(
+                {"detail": "to_member is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            to_member = Member.objects.get(id=to_member_id)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if to_member.id == request.user.id:
+            return Response(
+                {"detail": "You cannot send friend request to yourself"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if request already exists
+        existing_request = FriendRequest.objects.filter(
+            Q(from_member=request.user, to_member=to_member) |
+            Q(from_member=to_member, to_member=request.user)
+        ).first()
+        
+        if existing_request:
+            return Response(
+                {"detail": "Friend request already exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        friend_request = FriendRequest.objects.create(
+            from_member=request.user,
+            to_member=to_member
+        )
+        
+        serializer = FriendRequestSerializer(friend_request)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses={200: FriendRequestSerializer(many=True)},
+        description="Get friend requests"
+    )
+    def list(self, request):
+        user = request.user
+        
+        # Get incoming requests (pending only)
+        requests = FriendRequest.objects.filter(
+            to_member=user,
+            status='pending'
+        ).select_related('from_member', 'to_member')
+        
+        serializer = FriendRequestSerializer(requests, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: FriendRequestSerializer},
+        description="Accept friend request"
+    )
+    def accept(self, request, pk=None):
+        try:
+            friend_request = FriendRequest.objects.get(id=pk, to_member=request.user)
+        except FriendRequest.DoesNotExist:
+            return Response(
+                {"detail": "Friend request not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if friend_request.status != 'pending':
+            return Response(
+                {"detail": "Request already processed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        friend_request.status = 'accepted'
+        friend_request.save()
+        
+        serializer = FriendRequestSerializer(friend_request)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: FriendRequestSerializer},
+        description="Reject friend request"
+    )
+    def reject(self, request, pk=None):
+        try:
+            friend_request = FriendRequest.objects.get(id=pk, to_member=request.user)
+        except FriendRequest.DoesNotExist:
+            return Response(
+                {"detail": "Friend request not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if friend_request.status != 'pending':
+            return Response(
+                {"detail": "Request already processed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        friend_request.status = 'rejected'
+        friend_request.save()
+        
+        serializer = FriendRequestSerializer(friend_request)
+        return Response(serializer.data)
+
+
+class FriendViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Friends operations
+    """
+    authentication_classes = [MemberJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get my friends list"
+    )
+    def list(self, request):
+        user = request.user
+        
+        friend_requests = FriendRequest.objects.filter(
+            Q(from_member=user) | Q(to_member=user),
+            status='accepted'
+        )
+        
+        friend_ids = set()
+        for fr in friend_requests:
+            if fr.from_member.id == user.id:
+                friend_ids.add(fr.to_member.id)
+            else:
+                friend_ids.add(fr.from_member.id)
+        
+        friends = Member.objects.filter(id__in=friend_ids)
+        serializer = MemberSerializer(friends, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={204: None},
+        description="Remove friend"
+    )
+    def destroy(self, request, pk=None):
+        user = request.user
+        
+        try:
+            friend = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Find and delete friend request
+        friend_request = FriendRequest.objects.filter(
+            Q(from_member=user, to_member=friend) |
+            Q(from_member=friend, to_member=user),
+            status='accepted'
+        ).first()
+        
+        if not friend_request:
+            return Response(
+                {"detail": "Friend relationship not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        friend_request.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SubscriptionViewSet(viewsets.ViewSet):
+    """
+    ViewSet for Subscription operations
+    """
+    authentication_classes = [MemberJWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={201: SubscriptionSerializer},
+        description="Subscribe to user"
+    )
+    def create(self, request, pk=None):
+        try:
+            following = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        if following.id == request.user.id:
+            return Response(
+                {"detail": "You cannot subscribe to yourself"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        subscription, created = Subscription.objects.get_or_create(
+            follower=request.user,
+            following=following
+        )
+        
+        if not created:
+            return Response(
+                {"detail": "Already subscribed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = SubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        responses={204: None},
+        description="Unsubscribe from user"
+    )
+    def destroy(self, request, pk=None):
+        try:
+            following = Member.objects.get(id=pk)
+        except Member.DoesNotExist:
+            return Response(
+                {"detail": "Member not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        try:
+            subscription = Subscription.objects.get(
+                follower=request.user,
+                following=following
+            )
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Subscription.DoesNotExist:
+            return Response(
+                {"detail": "Subscription not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get my subscriptions (following)"
+    )
+    def following(self, request):
+        subscriptions = Subscription.objects.filter(follower=request.user).select_related('following')
+        following = [sub.following for sub in subscriptions]
+        serializer = MemberSerializer(following, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        responses={200: MemberSerializer(many=True)},
+        description="Get my followers"
+    )
+    def followers(self, request):
+        subscriptions = Subscription.objects.filter(following=request.user).select_related('follower')
+        followers = [sub.follower for sub in subscriptions]
+        serializer = MemberSerializer(followers, many=True)
+        return Response(serializer.data)
