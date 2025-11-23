@@ -43,7 +43,7 @@ class MemberSerializer(serializers.ModelSerializer):
 
 class MemberRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, max_length=128)
-    password_confirm = serializers.CharField(write_only=True, min_length=8, max_length=128)
+    password_confirm = serializers.CharField(write_only=True, min_length=8, max_length=128, required=False)
 
     class Meta:
         model = Member
@@ -67,12 +67,13 @@ class MemberRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        if data['password'] != data['password_confirm']:
+        password_confirm = data.get('password_confirm')
+        if password_confirm and data['password'] != password_confirm:
             raise serializers.ValidationError({"password_confirm": "Passwords do not match"})
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
+        validated_data.pop('password_confirm', None)
         password = validated_data.pop('password')
         member = Member(**validated_data)
         member.set_password(password)
