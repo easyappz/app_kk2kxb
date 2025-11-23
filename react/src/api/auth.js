@@ -6,6 +6,7 @@ import instance from './axios';
  * @param {string} data.username - Username
  * @param {string} data.email - Email
  * @param {string} data.password - Password
+ * @param {string} data.password_confirm - Password confirmation
  * @param {string} [data.first_name] - First name
  * @param {string} [data.last_name] - Last name
  * @returns {Promise} Response with member, access and refresh tokens
