@@ -1,0 +1,96 @@
+openapi: 3.1.0
+info:
+  title: Social Network API
+  version: 1.0.0
+  description: Facebook-like social network API with posts, friends, messages, and subscriptions
+servers:
+  - url: /api
+    description: API server
+paths:
+  /auth/register:
+    $ref: './paths/auth.yml#/register'
+  /auth/login:
+    $ref: './paths/auth.yml#/login'
+  /auth/refresh:
+    $ref: './paths/auth.yml#/refresh'
+  /members:
+    $ref: './paths/members.yml#/list'
+  /members/{id}:
+    $ref: './paths/members.yml#/detail'
+  /members/search:
+    $ref: './paths/members.yml#/search'
+  /members/{id}/online-status:
+    $ref: './paths/members.yml#/onlineStatus'
+  /members/me:
+    $ref: './paths/members.yml#/me'
+  /members/me/settings:
+    $ref: './paths/members.yml#/settings'
+  /posts:
+    $ref: './paths/posts.yml#/list'
+  /posts/{id}:
+    $ref: './paths/posts.yml#/detail'
+  /posts/{id}/like:
+    $ref: './paths/posts.yml#/like'
+  /posts/{id}/unlike:
+    $ref: './paths/posts.yml#/unlike'
+  /posts/{id}/comments:
+    $ref: './paths/posts.yml#/comments'
+  /posts/{id}/repost:
+    $ref: './paths/posts.yml#/repost'
+  /friends/requests:
+    $ref: './paths/friends.yml#/requests'
+  /friends/requests/{id}/accept:
+    $ref: './paths/friends.yml#/acceptRequest'
+  /friends/requests/{id}/decline:
+    $ref: './paths/friends.yml#/declineRequest'
+  /friends:
+    $ref: './paths/friends.yml#/list'
+  /friends/{id}:
+    $ref: './paths/friends.yml#/remove'
+  /subscriptions:
+    $ref: './paths/friends.yml#/subscriptions'
+  /subscriptions/{id}:
+    $ref: './paths/friends.yml#/subscription'
+  /messages:
+    $ref: './paths/messages.yml#/list'
+  /messages/{id}:
+    $ref: './paths/messages.yml#/conversation'
+components:
+  schemas:
+    Member:
+      $ref: './schemas/member.yml'
+    Post:
+      $ref: './schemas/post.yml'
+    Comment:
+      $ref: './schemas/comment.yml'
+    FriendRequest:
+      $ref: './schemas/friend_request.yml'
+    Subscription:
+      $ref: './schemas/subscription.yml'
+    Message:
+      $ref: './schemas/message.yml'
+    Error:
+      $ref: './schemas/error.yml'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      required: false
+    offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      required: false

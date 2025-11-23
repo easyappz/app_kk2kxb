@@ -1,0 +1,19 @@
+type: object
+required:
+  - id
+  - subscriber
+  - subscribed_to
+  - created_at
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  subscriber:
+    $ref: './member.yml'
+  subscribed_to:
+    $ref: './member.yml'
+  created_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T12:00:00.000Z"

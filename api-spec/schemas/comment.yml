@@ -1,0 +1,29 @@
+type: object
+required:
+  - id
+  - author
+  - post
+  - content
+  - created_at
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  author:
+    $ref: './member.yml'
+  post:
+    type: integer
+    example: 5
+  content:
+    type: string
+    maxLength: 1000
+    example: "Great post! Thanks for sharing."
+  created_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T19:00:00.000Z"
+  updated_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T19:05:00.000Z"

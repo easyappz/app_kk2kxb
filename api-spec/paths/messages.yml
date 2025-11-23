@@ -1,0 +1,101 @@
+list:
+  get:
+    summary: Get conversations list
+    tags:
+      - Messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of conversations
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      member:
+                        $ref: '../schemas/member.yml'
+                      last_message:
+                        $ref: '../schemas/message.yml'
+                      unread_count:
+                        type: integer
+  post:
+    summary: Send message
+    tags:
+      - Messages
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - recipient
+              - content
+            properties:
+              recipient:
+                type: integer
+              content:
+                type: string
+    responses:
+      '201':
+        description: Message sent
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/message.yml'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+conversation:
+  get:
+    summary: Get conversation with member
+    tags:
+      - Messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Member ID
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: Conversation messages
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/message.yml'
+      '404':
+        description: Member not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'

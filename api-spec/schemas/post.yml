@@ -1,0 +1,61 @@
+type: object
+required:
+  - id
+  - author
+  - created_at
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  author:
+    $ref: './member.yml'
+  content:
+    type: string
+    maxLength: 5000
+    example: "Just had an amazing day at the beach!"
+  images:
+    type: array
+    items:
+      type: string
+      format: uri
+    example: ["/media/posts/img1.jpg", "/media/posts/img2.jpg"]
+  videos:
+    type: array
+    items:
+      type: string
+      format: uri
+    example: ["/media/posts/video1.mp4"]
+  likes_count:
+    type: integer
+    example: 42
+  comments_count:
+    type: integer
+    example: 15
+  reposts_count:
+    type: integer
+    example: 3
+  is_liked:
+    type: boolean
+    example: true
+  is_repost:
+    type: boolean
+    example: false
+  original_post:
+    type: object
+    nullable: true
+    properties:
+      id:
+        type: integer
+      author:
+        $ref: './member.yml'
+      content:
+        type: string
+  created_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T18:30:00.000Z"
+  updated_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T18:35:00.000Z"

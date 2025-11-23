@@ -1,0 +1,235 @@
+list:
+  get:
+    summary: List members
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of members
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                  example: 100
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/member.yml'
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+detail:
+  get:
+    summary: Get member by ID
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Member details
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/member.yml'
+      '404':
+        description: Member not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+  put:
+    summary: Update member
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              first_name:
+                type: string
+              last_name:
+                type: string
+              bio:
+                type: string
+              avatar:
+                type: string
+              cover_image:
+                type: string
+    responses:
+      '200':
+        description: Member updated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/member.yml'
+      '403':
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+search:
+  get:
+    summary: Search members
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+        description: Search query
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: Search results
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/member.yml'
+
+onlineStatus:
+  get:
+    summary: Get member online status
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Online status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_online:
+                  type: boolean
+                last_seen:
+                  type: string
+                  format: date-time
+
+me:
+  get:
+    summary: Get current user profile
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Current user profile
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/member.yml'
+
+settings:
+  get:
+    summary: Get user settings
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: User settings
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                notifications_enabled:
+                  type: boolean
+                privacy_level:
+                  type: string
+                  enum:
+                    - public
+                    - friends
+                    - private
+  put:
+    summary: Update user settings
+    tags:
+      - Members
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              notifications_enabled:
+                type: boolean
+              privacy_level:
+                type: string
+                enum:
+                  - public
+                  - friends
+                  - private
+              password:
+                type: string
+    responses:
+      '200':
+        description: Settings updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Settings updated successfully"

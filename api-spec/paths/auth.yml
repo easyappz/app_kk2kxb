@@ -1,0 +1,127 @@
+register:
+  post:
+    summary: Register new user
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - email
+              - password
+            properties:
+              username:
+                type: string
+                minLength: 3
+                maxLength: 50
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+                minLength: 8
+              first_name:
+                type: string
+              last_name:
+                type: string
+    responses:
+      '201':
+        description: User successfully registered
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                member:
+                  $ref: '../schemas/member.yml'
+                access:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refresh:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+login:
+  post:
+    summary: Login user
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - username
+              - password
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+    responses:
+      '200':
+        description: Successfully logged in
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                member:
+                  $ref: '../schemas/member.yml'
+                access:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                refresh:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      '401':
+        description: Invalid credentials
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+refresh:
+  post:
+    summary: Refresh access token
+    tags:
+      - Authentication
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - refresh
+            properties:
+              refresh:
+                type: string
+    responses:
+      '200':
+        description: Token refreshed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access:
+                  type: string
+      '401':
+        description: Invalid refresh token
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'

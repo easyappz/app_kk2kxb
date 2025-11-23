@@ -1,0 +1,292 @@
+list:
+  get:
+    summary: Get feed posts
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+      - name: author
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Filter by author ID
+    responses:
+      '200':
+        description: List of posts
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/post.yml'
+  post:
+    summary: Create new post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+              images:
+                type: array
+                items:
+                  type: string
+              videos:
+                type: array
+                items:
+                  type: string
+    responses:
+      '201':
+        description: Post created
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/post.yml'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+detail:
+  get:
+    summary: Get post by ID
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Post details
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/post.yml'
+      '404':
+        description: Post not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+  put:
+    summary: Update post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+    responses:
+      '200':
+        description: Post updated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/post.yml'
+  delete:
+    summary: Delete post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '204':
+        description: Post deleted
+      '403':
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+like:
+  post:
+    summary: Like a post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Post liked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                likes_count:
+                  type: integer
+      '404':
+        description: Post not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+unlike:
+  post:
+    summary: Unlike a post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Post unliked
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                likes_count:
+                  type: integer
+
+comments:
+  get:
+    summary: Get post comments
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of comments
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/comment.yml'
+  post:
+    summary: Add comment to post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - content
+            properties:
+              content:
+                type: string
+    responses:
+      '201':
+        description: Comment created
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/comment.yml'
+
+repost:
+  post:
+    summary: Repost a post
+    tags:
+      - Posts
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: string
+    responses:
+      '201':
+        description: Post reposted
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/post.yml'
+      '404':
+        description: Post not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'

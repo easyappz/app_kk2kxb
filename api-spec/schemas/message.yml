@@ -1,0 +1,32 @@
+type: object
+required:
+  - id
+  - sender
+  - recipient
+  - content
+  - created_at
+properties:
+  id:
+    type: integer
+    format: int64
+    example: 1
+  sender:
+    $ref: './member.yml'
+  recipient:
+    $ref: './member.yml'
+  content:
+    type: string
+    maxLength: 2000
+    example: "Hey! How are you doing?"
+  is_read:
+    type: boolean
+    example: false
+  created_at:
+    type: string
+    format: date-time
+    example: "2025-11-23T20:00:00.000Z"
+  read_at:
+    type: string
+    format: date-time
+    nullable: true
+    example: null

@@ -1,0 +1,256 @@
+requests:
+  get:
+    summary: Get friend requests
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+            - incoming
+            - outgoing
+        description: Filter by request type
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of friend requests
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/friend_request.yml'
+  post:
+    summary: Send friend request
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - to_member
+            properties:
+              to_member:
+                type: integer
+    responses:
+      '201':
+        description: Friend request sent
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/friend_request.yml'
+      '400':
+        description: Request already exists or invalid
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+acceptRequest:
+  post:
+    summary: Accept friend request
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Friend request accepted
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/friend_request.yml'
+      '404':
+        description: Request not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+declineRequest:
+  post:
+    summary: Decline friend request
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: Friend request declined
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/friend_request.yml'
+      '404':
+        description: Request not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+list:
+  get:
+    summary: Get friends list
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: member_id
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Get friends of specific member
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of friends
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/member.yml'
+
+remove:
+  delete:
+    summary: Remove friend
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Friend member ID
+    responses:
+      '204':
+        description: Friend removed
+      '404':
+        description: Friend not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+
+subscriptions:
+  get:
+    summary: Get subscriptions
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: type
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+            - my_subscriptions
+            - my_subscribers
+        description: Filter subscriptions
+      - $ref: '../openapi.yml#/components/parameters/limit'
+      - $ref: '../openapi.yml#/components/parameters/offset'
+    responses:
+      '200':
+        description: List of subscriptions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+                results:
+                  type: array
+                  items:
+                    $ref: '../schemas/subscription.yml'
+
+subscription:
+  post:
+    summary: Subscribe to member
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Member ID to subscribe to
+    responses:
+      '201':
+        description: Subscribed
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/subscription.yml'
+      '400':
+        description: Already subscribed
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'
+  delete:
+    summary: Unsubscribe from member
+    tags:
+      - Friends
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Member ID to unsubscribe from
+    responses:
+      '204':
+        description: Unsubscribed
+      '404':
+        description: Subscription not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/error.yml'

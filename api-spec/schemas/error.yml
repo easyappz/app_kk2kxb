@@ -1,0 +1,17 @@
+type: object
+properties:
+  error:
+    type: string
+    example: "Invalid credentials"
+  detail:
+    type: string
+    example: "Username or password is incorrect"
+  field_errors:
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        type: string
+    example:
+      email: ["This field is required"]
+      password: ["Password must be at least 8 characters"]
